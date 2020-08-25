@@ -1,0 +1,23 @@
+{
+  "name": "majestic-contact-form",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robotrobot/majestic-contact-form.git"
+  },
+  "author": "robotrobot",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/robotrobot/majestic-contact-form/issues"
+  },
+  "homepage": "https://github.com/robotrobot/majestic-contact-form#readme",
+  "devDependencies": {
+    "serverless-domain-manager": "^4.2.0",
+    "serverless-prune-plugin": "^1.4.3"
+  }
+}
