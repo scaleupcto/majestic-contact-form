@@ -35,7 +35,7 @@ provider:
        Resource:
          - arn:aws:s3:::${env:SERVERLESS_DEPLOYMENT_BUCKET, 'majestic-private'}
   httpApi:
-    cors: true
+    cors: false
   logs:
     httpApi: true
 package:
@@ -47,24 +47,26 @@ package:
 
 plugins:
   - serverless-prune-plugin
-  - serverless-domain-manager
+#  - serverless-domain-manager
 
 
 functions:
-  contact_send:
-    handler: handler.hello
-    name: majestic-contactform-send
-    role: apiRole
+  contactsend:
+    handler: handler.send
+    name: majestic-contact-send
+    role: sendRole
     timeout: 28
     environment:
       REDIRECT_LOCATION: ${env:MAJESTIC_REDIRECT_LOCATION, 'https://www.majestic-motors.co.uk/thanks'}
+      CONTACT_DESTINATION: info@majestic-motors.co.uk
+      SENDER: info@majestic-motors.co.uk
     events:
       - httpApi:
-          method: GET
+          method: POST
           path: /contact
 resources:
   Resources:
-    apiRole:
+    sendRole:
       Type: "AWS::IAM::Role"
       Properties:
         AssumeRolePolicyDocument:
@@ -89,5 +91,14 @@ resources:
                     - "logs:CreateLogStream"
                     - "logs:PutLogEvents"
                   Resource: "arn:aws:logs:*:*:*"
-        RoleName: majestic-contactform-ApiAccessRole
+          - PolicyName: "SendEmail"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "ses:SendEmail"
+                    - "ses:SendRawEmail"
+                  Resource: "*"
+        RoleName: majestic-contactform-SendRole
 
