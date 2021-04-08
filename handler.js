@@ -1,22 +1,26 @@
 'use strict';
 
-var AWS = require('aws-sdk');
-var ses = new AWS.SES();
+const AWS = require('aws-sdk');
+const ses = new AWS.SES();
+const monday = require('monday-sdk-js')();
+monday.setToken(process.env.MONDAY_API_V2_TOKEN);
+const moment = require("moment");
 
-var qs = require('querystring')
+const qs = require('querystring')
 
-module.exports.send = async event => {
+module.exports.contact = async event => {
   console.log(event);
-  var body = new Buffer.from(event.body, 'base64').toString('utf8');
-  var json = qs.parse(body);
+  const body = new Buffer.from(event.body, 'base64').toString('utf8');
+  const json = qs.parse(body);
   console.log(`Received contact form: ${body}`);
   try {
     await sendEmail(json);
+    await addEnquiry(json);
   } catch (e) {
     console.log("Caught error sending email");
     console.log(e);
   }
-  console.log(`Redirecting to ${process.env.MAJESTIC_REDIRECT_LOCATION}`);
+  console.log(`Redirecting to ${process.env.REDIRECT_LOCATION}`);
   return {
     'statusCode': 302,
     'headers': {
@@ -26,7 +30,7 @@ module.exports.send = async event => {
 };
 
 
-async function sendEmail (data) {
+async function sendEmail(data) {
   const params = {
     Destination: {
       ToAddresses: [
@@ -49,4 +53,24 @@ async function sendEmail (data) {
     ReplyToAddresses: [ data.email ]
   };
   return ses.sendEmail(params).promise();
+}
+
+async function addEnquiry(data) {
+  const columnValues = {
+    name: data.name,
+    date: {date: moment().format("YYYY-MM-DD")},
+    email: data.email,
+    phone9: {phone: data.phone || '', countryShortName: "GB"},
+    job_description: data.message
+  };
+  const query = `
+    mutation {
+      create_item (board_id: 437582950, group_id: "new_group", item_name: "Email enquiry from ${data.name}" column_values: ${JSON.stringify(JSON.stringify(columnValues))}) {
+        id
+      }
+    }`;
+  console.log(`Running query ${query}`);
+  const response = await monday.api(query);
+  console.log(response);
+  return response;
 }

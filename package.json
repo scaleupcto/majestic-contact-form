@@ -21,6 +21,8 @@
     "serverless-prune-plugin": "^1.4.3"
   },
   "dependencies": {
-    "aws-sdk": "^2.739.0"
+    "aws-sdk": "^2.739.0",
+    "moment": "^2.27.0",
+    "monday-sdk-js": "^0.1.0"
   }
 }

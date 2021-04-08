@@ -51,14 +51,15 @@ plugins:
 
 
 functions:
-  contactsend:
-    handler: handler.send
-    name: majestic-contact-send
+  contact:
+    handler: handler.contact
+    name: majestic-contact
     role: sendRole
     timeout: 28
     environment:
       REDIRECT_LOCATION: ${env:MAJESTIC_REDIRECT_LOCATION, 'https://www.majestic-motors.co.uk/thanks'}
       CONTACT_DESTINATION: info@majestic-motors.co.uk
+      MONDAY_API_V2_TOKEN: ${env:MAJESTIC_MONDAY_API_V2_TOKEN}
       SENDER: info@majestic-motors.co.uk
     events:
       - httpApi:
