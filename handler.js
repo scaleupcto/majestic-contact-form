@@ -6,7 +6,8 @@ const monday = require('monday-sdk-js')();
 monday.setToken(process.env.MONDAY_API_V2_TOKEN);
 const moment = require("moment");
 
-const qs = require('querystring')
+const qs = require('querystring');
+const _ = require('lodash');
 
 module.exports.contact = async event => {
   console.log(event);
@@ -29,8 +30,19 @@ module.exports.contact = async event => {
   };
 };
 
+const spamwords = [
+    ' SEO ',
+    ' Buddhism ',
+    'search engines',
+    'web design'
+];
+
+function isPotentialSpam(data) {
+  return (!_.isEmpty(data.url) || _.isEmpty(data.message) || !_.isEmpty(_.find(spamwords,(spamWord) => data.message.toLowerCase().includes(spamWord.toLowerCase()) ))) ;
+}
 
 async function sendEmail(data) {
+  const spamWarning = (isPotentialSpam(data)) ? "POTENTIAL SPAM " : "";
   const params = {
     Destination: {
       ToAddresses: [
@@ -45,32 +57,36 @@ async function sendEmail(data) {
         }
       },
       Subject: {
-        Data: `Website Enquiry from ${data.name}`,
+        Data: `${spamWarning}Website Enquiry from ${data.name}`,
         Charset: 'UTF-8'
       }
     },
     Source: process.env.SENDER,
-    ReplyToAddresses: [ data.email ]
+    ReplyToAddresses: [ data.email || 'info@majestic-motors.co.uk' ]
   };
   return ses.sendEmail(params).promise();
 }
 
 async function addEnquiry(data) {
-  const columnValues = {
-    name: data.name,
-    date: {date: moment().format("YYYY-MM-DD")},
-    email: data.email,
-    phone9: {phone: data.phone || '', countryShortName: "GB"},
-    job_description: data.message
-  };
-  const query = `
+  if (isPotentialSpam(data)) {
+    console.log("Potential spam detected - skipping adding enquiry to Monday.com");
+  } else {
+    const columnValues = {
+      name: data.name,
+      date: {date: moment().format("YYYY-MM-DD")},
+      email: data.email,
+      phone9: {phone: data.phone || '', countryShortName: "GB"},
+      job_description: data.message
+    };
+    const query = `
     mutation {
       create_item (board_id: 437582950, group_id: "new_group", item_name: "Email enquiry from ${data.name}" column_values: ${JSON.stringify(JSON.stringify(columnValues))}) {
         id
       }
     }`;
-  console.log(`Running query ${query}`);
-  const response = await monday.api(query);
-  console.log(response);
-  return response;
+    console.log(`Running query ${query}`);
+    const response = await monday.api(query);
+    console.log(response);
+    return response;
+  }
 }

@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.739.0",
+    "lodash": "^4.17.21",
     "moment": "^2.27.0",
     "monday-sdk-js": "^0.1.0"
   }
