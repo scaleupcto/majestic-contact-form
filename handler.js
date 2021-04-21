@@ -34,7 +34,8 @@ const spamwords = [
     ' SEO ',
     ' Buddhism ',
     'search engines',
-    'web design'
+    'web design',
+    'Bitcoin'
 ];
 
 function isPotentialSpam(data) {
