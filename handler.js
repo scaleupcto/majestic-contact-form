@@ -38,7 +38,8 @@ const spamwords = [
     'Bitcoin',
     'cryptocurrency',
     'Google Ads',
-    ' PPC '
+    ' PPC ',
+    'Your website or a website that your organization hosts is infringing on a copyrighted images owned by myself'
 ];
 
 function isPotentialSpam(data) {
