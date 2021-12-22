@@ -1,8 +1,8 @@
 {
-  "name": "majestic-contact-form",
+  "name": "majestic-api",
   "version": "1.0.0",
   "description": "",
-  "main": "handler.js",
+  "main": "src/handlers/contact.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,6 +22,8 @@
   },
   "dependencies": {
     "aws-sdk": "^2.739.0",
+    "googleapis": "^84.0.0",
+    "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
     "moment": "^2.27.0",
     "monday-sdk-js": "^0.1.0"
