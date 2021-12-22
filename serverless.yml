@@ -42,7 +42,7 @@ package:
   exclude:
     - .*/**
   include:
-    - handler.js
+    - contact.js
     - node_modules/**
 
 plugins:
@@ -52,9 +52,9 @@ plugins:
 
 functions:
   contact:
-    handler: handler.contact
+    handler: src/handlers/contact.handler
     name: majestic-contact
-    role: sendRole
+    role: contactRole
     timeout: 28
     environment:
       REDIRECT_LOCATION: ${env:MAJESTIC_REDIRECT_LOCATION, 'https://www.majestic-motors.co.uk/thanks'}
@@ -65,9 +65,64 @@ functions:
       - httpApi:
           method: POST
           path: /contact
+  create-gdoc:
+    handler: src/handlers/gdoc.create
+    name: majestic-gdocs
+    role: gdocRole
+    timeout: 28
+    environment:
+      MONDAY_API_V2_TOKEN: ${env:MAJESTIC_MONDAY_API_V2_TOKEN}
+      MAJESTIC_MONDAY_APP_SIGNING_SECRET: ${env:MAJESTIC_MONDAY_APP_SIGNING_SECRET}
+      ON_ERR_EMAIL: info@majestic-motors.co.uk
+    events:
+      - httpApi:
+          method: POST
+          path: /gdocs
 resources:
   Resources:
-    sendRole:
+    gdocRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - "lambda.amazonaws.com"
+              Action: "sts:AssumeRole"
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaENIManagementAccess
+        Policies:
+          - PolicyName: "DynamoDB"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action: "dynamodb:*"
+                  Resource: "arn:aws:dynamodb:eu-west-1:*:table/AtomicCounters"
+          - PolicyName: "EnableLogging"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "logs:CreateLogGroup"
+                    - "logs:CreateLogStream"
+                    - "logs:PutLogEvents"
+                  Resource: "arn:aws:logs:*:*:*"
+          - PolicyName: "SendEmail"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "ses:SendEmail"
+                    - "ses:SendRawEmail"
+                  Resource: "*"
+        RoleName: majestic-api-GDocsRole
+    contactRole:
       Type: "AWS::IAM::Role"
       Properties:
         AssumeRolePolicyDocument:
@@ -101,5 +156,5 @@ resources:
                     - "ses:SendEmail"
                     - "ses:SendRawEmail"
                   Resource: "*"
-        RoleName: majestic-contactform-SendRole
+        RoleName: majestic-api-ContactRole
 
