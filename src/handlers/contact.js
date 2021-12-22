@@ -65,7 +65,7 @@ async function sendEmail(data) {
         }
       },
       Subject: {
-        Data: data._storage || `${spamWarning}${subject} from ${data.name}`,
+        Data: `${spamWarning}${subject} from ${data.name}`,
         Charset: 'UTF-8'
       }
     },
@@ -76,9 +76,11 @@ async function sendEmail(data) {
 }
 
 async function addEnquiry(data) {
+
   if (isPotentialSpam(data)) {
     console.log("Potential spam detected - skipping adding enquiry to Monday.com");
   } else {
+    const subject = _.isEmpty(data._subject) ? "Website Enquiry" : data._subject;
     const columnValues = {
       name: data.name,
       date: {date: moment().format("YYYY-MM-DD")},
@@ -88,7 +90,7 @@ async function addEnquiry(data) {
     };
     const query = `
     mutation {
-      create_item (board_id: 437582950, group_id: "new_group", item_name: "Email enquiry from ${data.name}" column_values: ${JSON.stringify(JSON.stringify(columnValues))}) {
+      create_item (board_id: 437582950, group_id: "new_group", item_name: "${subject} from ${data.name}" column_values: ${JSON.stringify(JSON.stringify(columnValues))}) {
         id
       }
     }`;
