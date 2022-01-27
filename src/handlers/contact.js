@@ -41,12 +41,23 @@ const spamwords = [
     ' PPC ',
     'Binance',
     'TEDx',
-    'Your website or a website that your organization hosts is infringing on a copyrighted images owned by myself'
+    'Your website or a website that your organization hosts is infringing on a copyrighted images owned by myself',
+    'Talk With Web Visitor',
+    'mobile app developer'
 ];
 
+const validSubjects = [
+    'Website enquiry',
+    'Storage enquiry'
+]
 function isPotentialSpam(data) {
-  return (!_.isEmpty(data.url) || _.isEmpty(data.message) || !_.isEmpty(_.find(spamwords,(spamWord) => data.message.toLowerCase().includes(spamWord.toLowerCase()) ))) ;
+  return (!_.isEmpty(data.url) ||
+      _.isEmpty(data.message) ||
+      !_.isEmpty(_.find(spamwords,(spamWord) => data.message.toLowerCase().includes(spamWord.toLowerCase()) )) ||
+      _.isEmpty(_.find(validSubjects,(subject) => data._subject === subject ))
+  );
 }
+
 
 async function sendEmail(data) {
   const spamWarning = (isPotentialSpam(data)) ? "POTENTIAL SPAM " : "";
